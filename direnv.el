@@ -41,6 +41,9 @@
 (defvar direnv--active-directory nil
   "Name of the directory for which direnv has most recently ran.")
 
+(defvar direnv--exec-path exec-path
+  "Save initial values of `exec-path'.")
+
 (defcustom direnv-always-show-summary t
   "Whether to show a summary message of environment changes on every change.
 
@@ -221,7 +224,8 @@ When FORCE-SUMMARY is non-nil or when called interactively, show a summary messa
             (value (cdr pair)))
         (setenv name value)
         (when (string-equal name "PATH")
-          (setq exec-path (append (parse-colon-path value) (list exec-directory))))))))
+          ;; don't overwrite system path in exec-path
+          (setq exec-path (-distinct (append (parse-colon-path value) direnv--exec-path))))))))
 
 ;;;###autoload
 (defun direnv-allow ()
